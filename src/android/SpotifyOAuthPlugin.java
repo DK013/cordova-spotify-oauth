@@ -1,4 +1,4 @@
-package rocks.festify;
+package com.zero;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -7,10 +7,10 @@ import android.util.Log;
 import org.apache.cordova.*;
 import org.json.*;
 
-import com.spotify.sdk.android.authentication.*;
+import com.spotify.sdk.android.auth.*;
 
 public class SpotifyOAuthPlugin extends CordovaPlugin {
-    private static final int LOGIN_REQUEST_CODE = 8139;
+    private static final int LOGIN_REQUEST_CODE = 5173;
     private static final String TAG = SpotifyOAuthPlugin.class.getName();
 
     private CallbackContext currentCtx = null;
@@ -39,16 +39,16 @@ public class SpotifyOAuthPlugin extends CordovaPlugin {
         cordova.setActivityResultCallback(this);
         this.currentCtx = ctx;
 
-        AuthenticationRequest ab = (new AuthenticationRequest.Builder(
+        AuthorizationRequest ab = (new AuthorizationRequest.Builder(
             clientId,
-            AuthenticationResponse.Type.CODE,
+            AuthorizationResponse.Type.CODE,
             redirectUrl
         ))
             .setScopes(scopes)
             .setShowDialog(true)
             .build();
 
-        AuthenticationClient.openLoginActivity(
+        AuthorizationClient.openLoginActivity(
             this.cordova.getActivity(), 
             LOGIN_REQUEST_CODE, 
             ab
@@ -69,8 +69,8 @@ public class SpotifyOAuthPlugin extends CordovaPlugin {
             return;
         }
 
-        final AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-        if (response.getType() == AuthenticationResponse.Type.CODE) {
+        final AuthorizationResponse response = AuthorizationClient.getResponse(resultCode, intent);
+        if (response.getType() == AuthorizationResponse.Type.CODE) {
             JSONObject res = new JSONObject();
             try {
                 res.put("code", response.getCode());
@@ -79,13 +79,13 @@ public class SpotifyOAuthPlugin extends CordovaPlugin {
             }
             cb.success(res);
         } else {
-            JSONObject err = response.getType() == AuthenticationResponse.Type.EMPTY ?
-                this.makeError(
+            JSONObject err = response.getType() == AuthorizationResponse.Type.EMPTY ?
+                SpotifyOAuthPlugin.makeError(
                     "auth_canceled",
                     "The user cancelled the authentication process."
-                ) : this.makeError(
+                ) : SpotifyOAuthPlugin.makeError(
                     "auth_failed",
-                    "Received authentication response of invalid type " + response.getType().toString()
+                    "Received authentication response of invalid type " + response.getType().toString() + ": " + response.getError().toString()
                 );
             cb.error(err);
         }

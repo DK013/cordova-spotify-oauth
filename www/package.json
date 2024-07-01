@@ -11,7 +11,7 @@
     "webpack": "^3.5.5"
   },
   "scripts": {
-    "build": "./node_modules/.bin/webpack -p"
+    "build": "webpack -p"
   },
   "dependencies": {
     "async": "^2.5.0",

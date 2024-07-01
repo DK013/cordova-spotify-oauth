@@ -11,7 +11,7 @@
     <platform name="android">
         <config-file target="config.xml" parent="/*">
             <feature name="SpotifyOAuth">
-                <param name="android-package" value="rocks.festify.SpotifyOAuthPlugin"/>
+                <param name="android-package" value="com.zero.SpotifyOAuthPlugin"/>
             </feature>
         </config-file>
 
@@ -21,7 +21,7 @@
                 android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
         </config-file>
 
-        <source-file src="src/android/SpotifyOAuthPlugin.java" target-dir="src/rocks/festify"/>
+        <source-file src="src/android/SpotifyOAuthPlugin.java" target-dir="src/com/zero"/>
 
         <framework src="src/android/build.gradle" custom="true" type="gradleReference" />
     </platform>

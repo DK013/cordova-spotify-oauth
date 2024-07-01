@@ -2,7 +2,15 @@
 
 Easy Spotify authentication for [Apache Cordova][cordova] / PhoneGap apps
 
+This repo is a fork of [Festify/cordova-spotify-oauth](https://github.com/Festify/cordova-spotify-oauth)
+
 [API Documentation][api-docs]
+
+## Changes
+
+1. Bumped Spotify Android SDK Version to [2.1.0](https://github.com/spotify/android-sdk/releases/tag/v0.8.0-appremote_v2.1.0-auth)
+2. Updated Android version requirements (Min: 26, Target: 34) for Android 13 support
+3. Updated Android error handler to return proper ERROR CODE
 
 ## Features
 
@@ -15,6 +23,7 @@ The plugin uses `SFSafariViewController` and Chrome Custom Tabs, if available. T
 The plugin consists of two functions clobbered onto `cordova.plugins.spotifyAuth`.
 
 ### Log in
+
 ```js
 const config = {
   clientId: "<SPOTIFY CLIENT ID>",
@@ -32,6 +41,7 @@ cordova.plugins.spotifyAuth.authorize(config)
 ```
 
 ### Log out
+
 ```js
 cordova.plugins.spotifyAuth.forget();
 ```
@@ -39,7 +49,7 @@ cordova.plugins.spotifyAuth.forget();
 ## Installation
 
 ```bash
-cordova plugin add cordova-spotify-oauth
+cordova plugin add cordova-spotify-oauth2
 ```
 
 ## Usage
@@ -62,7 +72,7 @@ You need to register your custom redirect URL within the Spotify Developer conso
 
 The authorization code flow requires server code for security. These come in the form of two HTTP endpoints, one for the auth code exchange, and the other one for access token refresh. The SDK will POST `application/x-www-form-urlencoded` data and expects JSON back. Ensure you have proper CORS config set up.
 
-To easily implement them, we built a [Serverless][serverless] service for [AWS Lambda][aws-lambda] over in the [`oauth-token-api`][token-api-example] folder. Make sure you [install the Serverless Framework properly][serverless-installation]!
+To easily implement them, we built a [Serverless] service for [AWS Lambda][aws-lambda] over in the [`oauth-token-api`][token-api-example] folder. Make sure you [install the Serverless Framework properly][serverless-installation]!
 To resolve the project dependencies, please use [yarn][yarn-install] as shown below before deploying the service.
 
 For the execution of the functions to work you need to set some environmental configuration in the file `oauth-token-api/.env`
@@ -89,18 +99,18 @@ The `serverless` CLI will then print the URL where the functions can be reached.
 Head over to the [API Documentation][api-docs].
 
 ## Contributing
-Pull requests are very welcome! Please use the [gitmoji][gitmoji] style for commit messages.
 
+Pull requests are very welcome! Please use the [gitmoji] style for commit messages.
 
-[api-docs]: https://festify.github.io/cordova-spotify-oauth/ "API Documentation"
+[api-docs]: https://festify.github.io/cordova-spotify-oauth/
 [auth-code-flow]: https://developer.spotify.com/web-api/authorization-guide/#authorization-code-flow
-[aws-lambda]: https://aws.amazon.com/lambda/ "AWS Lambda"
-[cordova]: https://cordova.apache.org/ "Apache Cordova"
-[cordova-scheme-helper]: https://github.com/Festify/festify-cordova-scheme-helper "Festify Cordova Scheme Helper"
-[gitmoji]: https://gitmoji.carloscuesta.me/ "Gitmoji"
-[serverless]: https://serverless.com "Serverless Framework"
-[serverless-installation]: https://serverless.com/framework/docs/providers/aws/guide/installation/ "Serverless Framework Installation"
-[token-api-example]: https://github.com/Festify/cordova-spotify-oauth/tree/develop/oauth-token-api "OAuth Token Service example"
-[token-exchange-url]: https://festify.github.io/cordova-spotify-oauth/interfaces/config.html#tokenexchangeurl "OAuth Auth Code Exchange URL"
-[token-refresh-url]: https://festify.github.io/cordova-spotify-oauth/interfaces/config.html#tokenrefreshurl "OAuth Access Token Refresh URL"
-[yarn-install]: https://yarnpkg.com/en/docs/install "Yarn Install"
+[aws-lambda]: https://aws.amazon.com/lambda/
+[cordova]: https://cordova.apache.org/
+[cordova-scheme-helper]: https://github.com/Festify/festify-cordova-scheme-helper
+[gitmoji]: https://gitmoji.carloscuesta.me/
+[serverless]: https://serverless.com
+[serverless-installation]: https://serverless.com/framework/docs/providers/aws/guide/installation/
+[token-api-example]: https://github.com/Festify/cordova-spotify-oauth/tree/develop/oauth-token-api
+[token-exchange-url]: https://festify.github.io/cordova-spotify-oauth/interfaces/config.html#tokenexchangeurl
+[token-refresh-url]: https://festify.github.io/cordova-spotify-oauth/interfaces/config.html#tokenrefreshurl
+[yarn-install]: https://yarnpkg.com/en/docs/install

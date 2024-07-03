@@ -1,5 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
-<plugin id="cordova-spotify-oauth" version="0.1.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="cordova-spotify-oauth" version="2.0.3" xmlns="http://apache.org/cordova/ns/plugins/1.0"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <name>cordova-spotify-oauth</name>
 
     <js-module name="cordova-spotify-oauth" src="www/build/spotify-oauth.min.js">
@@ -18,7 +20,8 @@
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
             <activity
                 android:name="com.spotify.sdk.android.authentication.LoginActivity"
-                android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+                android:theme="@android:style/Theme.Translucent.NoTitleBar"
+                tools:ignore="MissingClass" />
         </config-file>
 
         <source-file src="src/android/SpotifyOAuthPlugin.java" target-dir="src/com/zero"/>

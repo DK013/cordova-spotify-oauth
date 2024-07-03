@@ -29,12 +29,18 @@ function cors(response) {
 
 const spotifyRequest = params => {
     return new Promise((resolve, reject) => {
-        request.post(API_URL, {
-            form: params,
-            headers: {
-                "Authorization": "Basic " + new Buffer(CLIENT_ID + ":" + CLIENT_SECRET).toString('base64')
-            }
-        }, (err, resp) => err ? reject(err) : resolve(resp));
+        params.client_id = CLIENT_ID;
+        params.client_secret = CLIENT_SECRET;
+        request.post(
+					API_URL,
+					{
+						form: qs.stringify(params),
+						headers: {
+							"Content-Type": "application/x-www-form-urlencoded",
+						},
+					},
+					(err, resp) => (err ? reject(err) : resolve(resp))
+				);
     })
         .then(resp => {
             if (resp.statusCode != 200) {
@@ -70,26 +76,29 @@ module.exports.exchangeCode = (event, context, callback) => {
     }
 
     spotifyRequest({
-        grant_type: "authorization_code",
-        redirect_uri: CLIENT_CALLBACK_URL,
-        code: params.code
-    })
-        .then(session => {
-            return Promise.resolve({
-                statusCode: 200,
-                body: JSON.stringify({
-                    "access_token" : session.access_token,
-                    "expires_in" : session.expires_in,
-                    "refresh_token" : crypto.encrypt(session.refresh_token, ENCRYPTION_SECRET)
-                })
-            });
-        })
-        .catch(response => {
-            return Promise.resolve(response);
-        })
-        .then(response => {
-           callback(null, cors(response));
-        });
+			grant_type: "client_credentials",
+			redirect_uri: CLIENT_CALLBACK_URL,
+			code: params.code,
+		})
+			.then((session) => {
+				return Promise.resolve({
+					statusCode: 200,
+					body: JSON.stringify({
+						access_token: session.access_token,
+						expires_in: session.expires_in,
+						token_type: session.token_type,
+						...(session.refresh_token && {
+							refresh_token: encrypt(session.refresh_token),
+						}),
+					}),
+				});
+			})
+			.catch((response) => {
+				return Promise.resolve(response);
+			})
+			.then((response) => {
+				callback(null, cors(response));
+			});
 };
 
 module.exports.refreshToken = (event, context, callback) => {

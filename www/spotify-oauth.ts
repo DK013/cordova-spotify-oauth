@@ -1,5 +1,5 @@
-import 'whatwg-fetch';
-import exec from './lib/exec-promise';
+import "whatwg-fetch";
+import exec from "./lib/exec-promise";
 
 /**
  * The local storage key where the auth data is cached.
@@ -12,47 +12,53 @@ export const LOCAL_STORAGE_KEY = "SpotifyOAuthData";
  * The authorization data.
  */
 export interface AuthorizationData {
-    /** A valid access token. */
-    accessToken: string;
+	/** A valid access token. */
+	accessToken: string;
 
-    /** The encrypted refresh token. */
-    encryptedRefreshToken: string;
+	/** The encrypted refresh token. */
+	encryptedRefreshToken: string;
 
-    /** The date (from UTC, in milliseconds) when the given access token expires. */
+	/** The date (from UTC, in milliseconds) when the given access token expires. */
     expiresAt: number;
+
+    /** The token type */
+    tokenType: string;
+    
+    /** The authorization code */
+    code: string;
 }
 
 /**
  * OAuth configuration data.
  */
 export interface Config {
-    /** The client ID as per the Spotify dev console. */
-    clientId: string;
+	/** The client ID as per the Spotify dev console. */
+	clientId: string;
 
-    /** The redirect URI as entered in the Spotify dev console. */
-    redirectUrl: string;
+	/** The redirect URI as entered in the Spotify dev console. */
+	redirectUrl: string;
 
-    /**
-     * Safety margin time (in milliseconds) for the token refresh.
-     *
-     * The plugin applies a safety margin to the token lifetime in order
-     * to give the token user enough time to perform all operations needed.
-     *
-     * Otherwise the plugin might hand out a token that is already expired
-     * before it could ever be used.
-     *
-     * The safety margin defaults to 30s.
-     */
-    refreshSafetyMargin?: number;
+	/**
+	 * Safety margin time (in milliseconds) for the token refresh.
+	 *
+	 * The plugin applies a safety margin to the token lifetime in order
+	 * to give the token user enough time to perform all operations needed.
+	 *
+	 * Otherwise the plugin might hand out a token that is already expired
+	 * before it could ever be used.
+	 *
+	 * The safety margin defaults to 30s.
+	 */
+	refreshSafetyMargin?: number;
 
-    /** Requested OAuth scopes. */
-    scopes: string[];
+	/** Requested OAuth scopes. */
+	scopes: string[];
 
-    /** The token exchange URL. */
-    tokenExchangeUrl: string;
+	/** The token exchange URL. */
+	tokenExchangeUrl: string;
 
-    /** The token refresh URL. */
-    tokenRefreshUrl: string;
+	/** The token refresh URL. */
+	tokenRefreshUrl: string;
 }
 
 /**
@@ -74,42 +80,45 @@ export interface Config {
  * @param cfg OAuth configuration
  */
 export function authorize(cfg: Config): Promise<AuthorizationData> {
-    if (!cfg.clientId) {
-        throw new Error("missing clientId");
-    }
-    if (!cfg.redirectUrl) {
-        throw new Error("missing redirectUri");
-    }
-    if (!Array.isArray(cfg.scopes)) {
-        throw new Error("missing scopes");
-    }
-    if (!cfg.tokenExchangeUrl) {
-        throw new Error("missing tokenExchangeUrl");
-    }
-    if (!cfg.tokenRefreshUrl) {
-        throw new Error("missing tokenRefreshUrl");
-    }
-    if ((cfg.refreshSafetyMargin || 0) < 0) {
-        throw new Error("safety margin < 0");
-    }
+	if (!cfg.clientId) {
+		throw new Error("missing clientId");
+	}
+	if (!cfg.redirectUrl) {
+		throw new Error("missing redirectUri");
+	}
+	if (!Array.isArray(cfg.scopes)) {
+		throw new Error("missing scopes");
+	}
+	if (!cfg.tokenExchangeUrl) {
+		throw new Error("missing tokenExchangeUrl");
+	}
+	if (!cfg.tokenRefreshUrl) {
+		throw new Error("missing tokenRefreshUrl");
+	}
+	if ((cfg.refreshSafetyMargin || 0) < 0) {
+		throw new Error("safety margin < 0");
+	}
 
-    const lsData = localStorage.getItem(LOCAL_STORAGE_KEY);
+	const lsData = localStorage.getItem(LOCAL_STORAGE_KEY);
 
-    if (!lsData) {
-        return saveAndHandleErrors(oauth(cfg), cfg.scopes, "auth_failed");
-    }
+	if (!lsData) {
+		return saveAndHandleErrors(oauth(cfg), cfg.scopes, "auth_failed");
+	}
 
-    const authData: (AuthorizationData & { scopes: string[] }) = JSON.parse(lsData);
-    const margin = (cfg.refreshSafetyMargin != undefined)
-        ? cfg.refreshSafetyMargin
-        : 30000;
-    const expiry = Date.now() + margin;
+	const authData: AuthorizationData & { scopes: string[] } = JSON.parse(lsData);
+	const margin =
+		cfg.refreshSafetyMargin != undefined ? cfg.refreshSafetyMargin : 30000;
+	const expiry = Date.now() + margin;
 
-    return arraysEqual(authData.scopes, cfg.scopes)
-        ? (authData.expiresAt > expiry)
-            ? Promise.resolve(authData)
-            : saveAndHandleErrors(refresh(cfg, authData), cfg.scopes, "refresh_failed")
-        : saveAndHandleErrors(oauth(cfg), cfg.scopes, "auth_failed");
+	return arraysEqual(authData.scopes, cfg.scopes)
+		? authData.expiresAt > expiry
+			? Promise.resolve(authData)
+			: saveAndHandleErrors(
+					refresh(cfg, authData),
+					cfg.scopes,
+					"refresh_failed"
+			  )
+		: saveAndHandleErrors(oauth(cfg), cfg.scopes, "auth_failed");
 }
 
 /**
@@ -119,7 +128,7 @@ export function authorize(cfg: Config): Promise<AuthorizationData> {
  * This is akin to a "logout".
  */
 export function forget() {
-    return localStorage.removeItem(LOCAL_STORAGE_KEY);
+	return localStorage.removeItem(LOCAL_STORAGE_KEY);
 }
 
 /**
@@ -129,27 +138,34 @@ export function forget() {
  * @hidden
  */
 function oauth(cfg: Config): Promise<AuthorizationData> {
-    return exec("getCode", [
-        cfg.clientId,
-        cfg.redirectUrl,
-        cfg.tokenExchangeUrl,
-        cfg.tokenRefreshUrl,
-        cfg.scopes
-    ])
-        .then(({ code }) => fetch(cfg.tokenExchangeUrl, {
-            method: 'post',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: 'code=' + code
-        }))
-        .then(handleHttpErrors)
-        .then(resp => resp.json())
-        .then(({ access_token, expires_in, refresh_token }) => ({
-            accessToken: access_token,
-            encryptedRefreshToken: refresh_token,
-            expiresAt: expires_in * 1000 + Date.now()
-        }));
+	let code: string;
+	return exec("getCode", [
+		cfg.clientId,
+		cfg.redirectUrl,
+		cfg.tokenExchangeUrl,
+		cfg.tokenRefreshUrl,
+		cfg.scopes,
+	])
+		.then(({ code: c }: { code: string }) => {
+			localStorage.setItem("spotifyOauthCode", c);
+			code = c;
+			return fetch(cfg.tokenExchangeUrl, {
+				method: "post",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+				body: "code=" + c,
+			});
+		})
+		.then(handleHttpErrors)
+		.then((resp) => resp.json())
+		.then(({ access_token, expires_in, token_type, refresh_token }) => ({
+			accessToken: access_token,
+			encryptedRefreshToken: refresh_token,
+			expiresAt: expires_in * 1000 + Date.now(),
+			tokenType: token_type.toLowerCase(),
+			code: code,
+		}));
 }
 
 /**
@@ -159,21 +175,47 @@ function oauth(cfg: Config): Promise<AuthorizationData> {
  * @param data The auth data to refresh
  * @hidden
  */
-function refresh(cfg: Config, data: AuthorizationData): Promise<AuthorizationData> {
-    return fetch(cfg.tokenRefreshUrl, {
-        method: 'post',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: 'refresh_token=' + encodeURIComponent(data.encryptedRefreshToken)
-    })
-        .then(handleHttpErrors)
-        .then(resp => resp.json())
-        .then(({ access_token, expires_in }) => ({
-            accessToken: access_token,
-            encryptedRefreshToken: data.encryptedRefreshToken,
-            expiresAt: expires_in * 1000 + Date.now()
-        }))
+function refresh(
+	cfg: Config,
+	data: AuthorizationData
+): Promise<AuthorizationData> {
+	if (data.encryptedRefreshToken) {
+		return fetch(cfg.tokenRefreshUrl, {
+			method: "post",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+			},
+			body: "refresh_token=" + encodeURIComponent(data.encryptedRefreshToken),
+		})
+			.then(handleHttpErrors)
+			.then((resp) => resp.json())
+			.then(({ access_token, expires_in }) => ({
+				accessToken: access_token,
+				encryptedRefreshToken: data.encryptedRefreshToken,
+                expiresAt: expires_in * 1000 + Date.now(),
+                tokenType: data.tokenType,
+				code: data.code,
+			}));
+	} else if (data.code) {
+		return fetch(cfg.tokenExchangeUrl, {
+			method: "post",
+			headers: {
+				"Content-Type": "application/x-www-form-urlencoded",
+			},
+			body: "code=" + data.code,
+		})
+			.then(handleHttpErrors)
+			.then((resp) => resp.json())
+			.then(({ access_token, expires_in, token_type, refresh_token }) => ({
+				accessToken: access_token,
+				encryptedRefreshToken: refresh_token,
+				expiresAt: expires_in * 1000 + Date.now(),
+				tokenType: token_type.toLowerCase(),
+				code: data.code,
+			}));
+	} else {
+		return Promise.reject(new Error("no refresh token"));
+	}
 }
 
 /**
@@ -184,19 +226,19 @@ function refresh(cfg: Config, data: AuthorizationData): Promise<AuthorizationDat
  * @hidden
  */
 function arraysEqual(a: string[], b: string[]): boolean {
-    if (a == b) {
-        return true;
-    }
-    if (!a || !b || a.length !== b.length) {
-        return false;
-    }
+	if (a == b) {
+		return true;
+	}
+	if (!a || !b || a.length !== b.length) {
+		return false;
+	}
 
-    for (let i = 0; i < a.length; i++) {
-        if (a[i] != b[i]) {
-            return false;
-        }
-    }
-    return true;
+	for (let i = 0; i < a.length; i++) {
+		if (a[i] != b[i]) {
+			return false;
+		}
+	}
+	return true;
 }
 
 /**
@@ -207,9 +249,11 @@ function arraysEqual(a: string[], b: string[]): boolean {
  * @hidden
  */
 function handleHttpErrors(resp: Response): Promise<Response> {
-    return resp.ok ?
-        Promise.resolve(resp) :
-        Promise.reject(Promise.reject(new Error("got invalid HTTP status code " + resp.status)));
+	return resp.ok
+		? Promise.resolve(resp)
+		: Promise.reject(
+				Promise.reject(new Error("got invalid HTTP status code " + resp.status))
+		  );
 }
 
 /**
@@ -222,18 +266,21 @@ function handleHttpErrors(resp: Response): Promise<Response> {
  * @hidden
  */
 function saveAndHandleErrors(
-    pr: Promise<AuthorizationData>,
-    scopes: string[],
-    errorName: string
+	pr: Promise<AuthorizationData>,
+	scopes: string[],
+	errorName: string
 ): Promise<AuthorizationData> {
-    return pr
-        .then(data => {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ ...data, scopes }));
-            return data;
-        })
-        .catch(err => {
-            const e = new Error(err.message);
-            e.name = errorName;
-            return Promise.reject(e);
-        });
+	return pr
+		.then((data) => {
+			localStorage.setItem(
+				LOCAL_STORAGE_KEY,
+				JSON.stringify({ ...data, scopes })
+			);
+			return data;
+		})
+		.catch((err) => {
+			const e = new Error(err.message);
+			e.name = errorName;
+			return Promise.reject(e);
+		});
 }

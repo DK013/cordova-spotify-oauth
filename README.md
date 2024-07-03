@@ -11,6 +11,7 @@ This repo is a fork of [Festify/cordova-spotify-oauth](https://github.com/Festif
 1. Bumped Spotify Android SDK Version to [2.1.0](https://github.com/spotify/android-sdk/releases/tag/v0.8.0-appremote_v2.1.0-auth)
 2. Updated Android version requirements (Min: 26, Target: 34) for Android 13 support
 3. Updated Android error handler to return proper ERROR CODE
+4. Updated server side with latest Spotify Web API specs
 
 ## Features
 

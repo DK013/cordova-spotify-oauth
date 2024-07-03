@@ -1,31 +1,31 @@
 {
-  "name": "cordova-spotify-oauth2",
-  "version": "2.0.3",
-  "description": "Cordova plugin for authenticating with Spotify",
-  "main": "www/build/spotify-oauth.min.js",
-  "author": "Festify Dev Team <mail+git@festify.rocks>",
-  "contributors": [
-    "Moritz Gunz <moritz.gunz@gmail.com>",
-    "Leo Bernard <admin@leolabs.org>",
-    "Marcus Weiner <melodie124@gmail.com>"
-  ],
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/DK013/cordova-spotify-oauth.git"
-  },
-  "engines": {
-    "cordovaDependencies": {
-      "0.1.0": {
-        "cordova": "^6.0.0 - 12.0.0"
-      }
-    }
-  },
-  "keywords": [
-    "ecosystem:cordova",
-    "cordova-android",
-    "cordova-ios",
-    "spotify",
-    "oauth"
-  ]
+	"name": "cordova-spotify-oauth2",
+	"version": "2.0.3",
+	"description": "Cordova plugin for authenticating with Spotify",
+	"main": "www/build/spotify-oauth.min.js",
+	"author": "Festify Dev Team <mail+git@festify.rocks>",
+	"contributors": [
+		"Moritz Gunz <moritz.gunz@gmail.com>",
+		"Leo Bernard <admin@leolabs.org>",
+		"Marcus Weiner <melodie124@gmail.com>"
+	],
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/DK013/cordova-spotify-oauth.git"
+	},
+	"engines": {
+		"cordovaDependencies": {
+			"2.0.0": {
+				"cordova": "^6.0.0 - 12.0.0"
+			}
+		}
+	},
+	"keywords": [
+		"ecosystem:cordova",
+		"cordova-android",
+		"cordova-ios",
+		"spotify",
+		"oauth"
+	]
 }
